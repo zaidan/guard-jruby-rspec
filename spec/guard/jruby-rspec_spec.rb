@@ -11,7 +11,8 @@ describe Guard::JRubyRSpec do
       :spec_file_suffix => "_spec.rb",
       :run_all => {},
       :monitor_file => ".guard-jruby-rspec",
-      :custom_reloaders => []
+      :custom_reloaders => [],
+      :watchers => custom_watchers
     }
   end
 
@@ -19,10 +20,10 @@ describe Guard::JRubyRSpec do
     [Guard::Watcher.new(%r{^spec/(.+)$}, lambda { |m| "spec/#{m[1]}_match"})]
   end
 
-  subject { described_class.new custom_watchers, default_options}
+  subject { described_class.new default_options}
 
-  let(:inspector) { mock(described_class::Inspector, :excluded= => nil, :spec_paths= => nil, :spec_paths => [], :clean => []) }
-  let(:runner)    { mock(described_class::Runner, :set_rspec_version => nil, :rspec_version => nil) }
+  let(:inspector) { double(described_class::Inspector, :excluded= => nil, :spec_paths= => nil, :spec_paths => [], :clean => []) }
+  let(:runner)    { double(described_class::Runner, :set_rspec_version => nil, :rspec_version => nil) }
 
   before do
     described_class::Runner.stub(:new => runner)
@@ -49,13 +50,13 @@ describe Guard::JRubyRSpec do
     it 'creates an inspector' do
       described_class::Inspector.should_receive(:new).with(default_options.merge(:foo => :bar))
 
-      described_class.new([], :foo => :bar)
+      described_class.new(:foo => :bar)
     end
 
     it 'creates a runner' do
       described_class::Runner.should_receive(:new).with(default_options.merge(:foo => :bar))
 
-      described_class.new([], :foo => :bar)
+      described_class.new(:foo => :bar)
     end
   end
 
@@ -66,7 +67,7 @@ describe Guard::JRubyRSpec do
     end
 
     context ':all_on_start option is false' do
-      let(:subject) { subject = described_class.new([], :all_on_start => false) }
+      let(:subject) { subject = described_class.new(:all_on_start => false) }
 
       it "doesn't call #run_all" do
         subject.should_not_receive(:run_all)
@@ -86,7 +87,7 @@ describe Guard::JRubyRSpec do
     end
 
     it 'passes the :run_all options' do
-      subject = described_class.new([], {
+      subject = described_class.new({
         :rvm => ['1.8.7', '1.9.2'], :cli => '--color', :run_all => { :cli => '--format progress' }
       })
       runner.should_receive(:run).with(['spec'], hash_including(:cli => '--format progress')) { true }
@@ -153,7 +154,7 @@ describe Guard::JRubyRSpec do
     end
 
     it 'should use @options to alter spec file suffix' do
-      subject = described_class.new([], :spec_file_suffix => '_test.rb')
+      subject = described_class.new(:spec_file_suffix => '_test.rb')
       test_file = 'specs/myapp/greeter_test.rb'
       File.stub(:exists?).and_return(true)
       subject.stub(:load)
@@ -195,7 +196,7 @@ describe Guard::JRubyRSpec do
       end
 
       context ':all_after_pass option is false' do
-        subject { described_class.new(custom_watchers, :all_after_pass => false) }
+        subject { described_class.new({ :watchers => custom_watchers, :all_after_pass => false }) }
 
         it "doesn't call #run_all" do
           runner.should_receive(:run).with(['spec/foo_match']) { false }
@@ -221,7 +222,7 @@ describe Guard::JRubyRSpec do
     end
 
     it 'keeps failed spec and rerun them later' do
-      subject = described_class.new(custom_watchers, :all_after_pass => false)
+      subject = described_class.new({ :watchers=> custom_watchers, :all_after_pass => false})
 
       inspector.should_receive(:clean).with(['spec/bar_match']).and_return(['spec/bar_match'])
       runner.should_receive(:run).with(['spec/bar_match']) { false }
@@ -246,7 +247,7 @@ describe Guard::JRubyRSpec do
     end
 
     it "works with watchers that have an array of test targets" do
-      subject = described_class.new([Guard::Watcher.new(%r{^spec/(.+)$}, lambda { |m| ["spec/#{m[1]}_match", "spec/#{m[1]}_another.rb"]})])
+      subject = described_class.new(:watchers => [Guard::Watcher.new(%r{^spec/(.+)$}, lambda { |m| ["spec/#{m[1]}_match", "spec/#{m[1]}_another.rb"]})])
 
       test_targets = ["spec/quack_spec_match", "spec/quack_spec_another.rb"]
 
@@ -258,7 +259,7 @@ describe Guard::JRubyRSpec do
 
 
     it "works with watchers that don't have an action" do
-      subject = described_class.new([Guard::Watcher.new(%r{^spec/(.+)$})])
+      subject = described_class.new(:watchers => [Guard::Watcher.new(%r{^spec/(.+)$})])
 
       inspector.should_receive(:clean).with(anything).and_return(['spec/quack_spec'])
       runner.should_receive(:run).with(['spec/quack_spec']) { true }
@@ -267,10 +268,10 @@ describe Guard::JRubyRSpec do
     end
 
     it "works with watchers that do have an action" do
-      watcher_with_action = mock(Guard::Watcher, :match => :matches, :action => true)
+      watcher_with_action = double(Guard::Watcher, :match => :matches, :action => true)
       watcher_with_action.should_receive(:call_action).with(:matches).and_return('spec/foo_match')
 
-      subject = described_class.new([watcher_with_action])
+      subject = described_class.new(:watchers => [watcher_with_action])
 
       inspector.should_receive(:clean).with(['spec/foo_match']).and_return(['spec/foo_match'])
       runner.should_receive(:run).with(['spec/foo_match']) { true }

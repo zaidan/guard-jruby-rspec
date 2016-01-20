@@ -8,7 +8,7 @@ module Guard
     autoload :Runner,       'guard/jruby-rspec/runner'
     autoload :Inspector,    'guard/jruby-rspec/inspector'
 
-    def initialize(watchers = [], options = {})
+    def initialize(options = {})
       @options = {
         :all_after_pass   => true,
         :all_on_start     => true,
@@ -22,6 +22,7 @@ module Guard
       @last_failed  = false
       @failed_paths = []
 
+      watchers = options[:watchers]
       default_watchers = [Watcher.new(@monitor)]
       if @custom_watchers.nil? or @custom_watchers.empty?
         default_watchers <<
@@ -34,12 +35,13 @@ module Guard
       end
 
       @custom_watchers = watchers
+      @options[:watchers] = default_watchers
 
       # touch the monitor file (lets the gjrspec know we're here)
       #File.open(@monitor, "w") {}
 
       # ideally we would bypass the Guard::RSpec initializer
-      super(default_watchers, @options)
+      super(@options)
 
       @inspector = Inspector.new(@options)
       @runner = Runner.new(@options)
