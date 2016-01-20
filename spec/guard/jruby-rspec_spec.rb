@@ -120,7 +120,7 @@ describe Guard::JRubyRSpec do
 
   describe '#reload_rails' do
     it 'continues silently if the supported Rails 3.2+ version of Rails reloading is not supported' do
-      defined?(::ActionDispatch::Reloader).should be_false
+      defined?(::ActionDispatch::Reloader).should be false
       expect {
         subject.reload_rails
       }.not_to raise_exception
@@ -136,7 +136,7 @@ describe Guard::JRubyRSpec do
 
   describe '#reload_factory_girl' do
     it 'continues silently if FactoryGirl is not loaded' do
-      defined?(::FactoryGirl).should be_false
+      defined?(::FactoryGirl).should be false
       expect {
         subject.reload_factory_girl
       }.not_to raise_exception
