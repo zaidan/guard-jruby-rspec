@@ -11,8 +11,7 @@ describe Guard::JRubyRSpec do
       :spec_file_suffix => "_spec.rb",
       :run_all => {},
       :monitor_file => ".guard-jruby-rspec",
-      :custom_reloaders => [],
-      :watchers => custom_watchers
+      :custom_reloaders => []
     }
   end
 
@@ -20,7 +19,7 @@ describe Guard::JRubyRSpec do
     [Guard::Watcher.new(%r{^spec/(.+)$}, lambda { |m| "spec/#{m[1]}_match"})]
   end
 
-  subject { described_class.new default_options}
+  subject { described_class.new default_options.merge({ :watchers => custom_watchers }) }
 
   let(:inspector) { double(described_class::Inspector, :excluded= => nil, :spec_paths= => nil, :spec_paths => [], :clean => []) }
   let(:runner)    { double(described_class::Runner, :set_rspec_version => nil, :rspec_version => nil) }
