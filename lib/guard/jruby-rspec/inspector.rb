@@ -1,8 +1,8 @@
-require 'guard/rspec/inspector'
+require 'guard/rspec/inspectors/simple_inspector'
 
 module Guard
   class JRubyRSpec
-    class Inspector < ::Guard::RSpec::Inspector
+    class Inspector < ::Guard::RSpec::Inspectors::SimpleInspector
 
     end
   end
