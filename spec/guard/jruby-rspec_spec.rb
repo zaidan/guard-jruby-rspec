@@ -31,6 +31,10 @@ describe Guard::JRubyRSpec do
     Guard::UI.stub(:info)
   end
 
+  before :all do
+    Guard.setup
+  end
+
   shared_examples_for 'clear failed paths' do
     it 'should clear the previously failed paths' do
       inspector.stub(:clean).and_return(['spec/foo_match'], ['spec/bar_match'])
