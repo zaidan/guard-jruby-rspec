@@ -3,13 +3,18 @@ require 'spec_helper'
 describe Guard::JRubyRSpec do
   let(:default_options) do
     {
-      :focus_on_failed => false,
+      :all_on_start=>true,
       :all_after_pass => true,
-      :all_on_start => true,
-      :keep_failed => true,
+      :run_all=>{:message=>"Running all specs"},
+      :failed_mode=>:none,
       :spec_paths => ['spec'],
+      :cmd=>nil,
+      :cmd_additional_args=>nil,
+      :launchy=>nil,
+      :notification=>true,
+      :title=>"RSpec results",
+      :keep_failed=>true,
       :spec_file_suffix => "_spec.rb",
-      :run_all => {},
       :monitor_file => ".guard-jruby-rspec",
       :custom_reloaders => []
     }
