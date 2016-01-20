@@ -59,7 +59,7 @@ module Guard
       super
     end
 
-    def run_on_changes(raw_paths)
+    def run_on_modifications(raw_paths)
       unload_previous_examples
       @reloaders.reload(raw_paths)
 
@@ -76,8 +76,6 @@ module Guard
         super(paths.flatten)
       end
     end
-    # Guard 1.1 renamed run_on_change to run_on_changes
-    alias_method :run_on_change, :run_on_changes
 
     def reload_rails(*)
       if defined? ::ActionDispatch::Reloader

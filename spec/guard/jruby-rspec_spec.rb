@@ -44,13 +44,13 @@ describe Guard::JRubyRSpec do
       inspector.stub(:clean).and_return(['spec/foo_match'], ['spec/bar_match'])
 
       runner.should_receive(:run).with(['spec/foo_match']) { false }
-      expect { subject.run_on_change(['spec/foo']) }.to throw_symbol :task_has_failed
+      expect { subject.run_on_modifications(['spec/foo']) }.to throw_symbol :task_has_failed
 
       runner.should_receive(:run) { true }
       expect { subject.run_all }.to_not throw_symbol # this actually clears the failed paths
 
       runner.should_receive(:run).with(['spec/bar_match']) { true }
-      subject.run_on_change(['spec/bar'])
+      subject.run_on_modifications(['spec/bar'])
     end
   end
 
@@ -182,25 +182,25 @@ describe Guard::JRubyRSpec do
     end
   end
 
-  describe '#run_on_change' do
+  describe '#run_on_modifications' do
     before { inspector.stub(:clean => ['spec/foo_match']) }
 
     it 'runs rspec with paths' do
       runner.should_receive(:run).with(['spec/foo_match']) { true }
 
-      subject.run_on_change(['spec/foo'])
+      subject.run_on_modifications(['spec/foo'])
     end
 
     context 'the changed specs pass after failing' do
       it 'calls #run_all' do
         runner.should_receive(:run).with(['spec/foo_match']) { false }
 
-        expect { subject.run_on_change(['spec/foo']) }.to throw_symbol :task_has_failed
+        expect { subject.run_on_modifications(['spec/foo']) }.to throw_symbol :task_has_failed
 
         runner.should_receive(:run).with(['spec/foo_match']) { true }
         subject.should_receive(:run_all)
 
-        expect { subject.run_on_change(['spec/foo']) }.to_not throw_symbol
+        expect { subject.run_on_modifications(['spec/foo']) }.to_not throw_symbol
       end
 
       context ':all_after_pass option is false' do
@@ -209,12 +209,12 @@ describe Guard::JRubyRSpec do
         it "doesn't call #run_all" do
           runner.should_receive(:run).with(['spec/foo_match']) { false }
 
-          expect { subject.run_on_change(['spec/foo']) }.to throw_symbol :task_has_failed
+          expect { subject.run_on_modifications(['spec/foo']) }.to throw_symbol :task_has_failed
 
           runner.should_receive(:run).with(['spec/foo_match']) { true }
           subject.should_not_receive(:run_all)
 
-          expect { subject.run_on_change(['spec/foo']) }.to_not throw_symbol
+          expect { subject.run_on_modifications(['spec/foo']) }.to_not throw_symbol
         end
       end
     end
@@ -225,7 +225,7 @@ describe Guard::JRubyRSpec do
 
         subject.should_not_receive(:run_all)
 
-        subject.run_on_change(['spec/foo'])
+        subject.run_on_modifications(['spec/foo'])
       end
     end
 
@@ -235,23 +235,23 @@ describe Guard::JRubyRSpec do
       inspector.should_receive(:clean).with(['spec/bar_match']).and_return(['spec/bar_match'])
       runner.should_receive(:run).with(['spec/bar_match']) { false }
 
-      expect { subject.run_on_change(['spec/bar']) }.to throw_symbol :task_has_failed
+      expect { subject.run_on_modifications(['spec/bar']) }.to throw_symbol :task_has_failed
 
       inspector.should_receive(:clean).with(['spec/foo_match', 'spec/bar_match']).and_return(['spec/foo_match', 'spec/bar_match'])
       runner.should_receive(:run).with(['spec/foo_match', 'spec/bar_match']) { true }
 
-      subject.run_on_change(['spec/foo'])
+      subject.run_on_modifications(['spec/foo'])
 
       inspector.should_receive(:clean).with(['spec/foo_match']).and_return(['spec/foo_match'])
       runner.should_receive(:run).with(['spec/foo_match']) { true }
 
-      subject.run_on_change(['spec/foo'])
+      subject.run_on_modifications(['spec/foo'])
     end
 
     it "throws task_has_failed if specs doesn't pass" do
       runner.should_receive(:run).with(['spec/foo_match']) { false }
 
-      expect { subject.run_on_change(['spec/foo']) }.to throw_symbol :task_has_failed
+      expect { subject.run_on_modifications(['spec/foo']) }.to throw_symbol :task_has_failed
     end
 
     it "works with watchers that have an array of test targets" do
@@ -261,7 +261,7 @@ describe Guard::JRubyRSpec do
 
       inspector.should_receive(:clean).with(test_targets).and_return(test_targets)
       runner.should_receive(:run).with(test_targets) { true }
-      subject.run_on_change(['spec/quack_spec'])
+      subject.run_on_modifications(['spec/quack_spec'])
 
     end
 
@@ -272,7 +272,7 @@ describe Guard::JRubyRSpec do
       inspector.should_receive(:clean).with(anything).and_return(['spec/quack_spec'])
       runner.should_receive(:run).with(['spec/quack_spec']) { true }
 
-      subject.run_on_change(['spec/quack_spec'])
+      subject.run_on_modifications(['spec/quack_spec'])
     end
 
     it "works with watchers that do have an action" do
@@ -284,7 +284,7 @@ describe Guard::JRubyRSpec do
       inspector.should_receive(:clean).with(['spec/foo_match']).and_return(['spec/foo_match'])
       runner.should_receive(:run).with(['spec/foo_match']) { true }
 
-      subject.run_on_change(['spec/foo'])
+      subject.run_on_modifications(['spec/foo'])
     end
   end
 end
