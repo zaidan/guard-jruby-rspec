@@ -175,7 +175,7 @@ describe Guard::JRubyRSpec do
       lib_file = 'lib/myapp/greeter.rb'
       File.stub(:exists?).and_return(true)
       subject.stub(:load).and_raise("This fires and deactivates the jruby-rspec guard")
-      Guard::UI.should_receive(:error).any_number_of_times
+      Guard::UI.should_receive(:error)
       expect {
         subject.reload_paths([lib_file])
       }.to throw_symbol(:task_has_failed)
